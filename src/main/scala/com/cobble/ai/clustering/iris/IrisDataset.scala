@@ -15,6 +15,18 @@ class IrisDataset(resourceLocation: String = "iris.csv") extends Dataset[Iris](S
             map.getOrElse("petalWidthCm", "0").toFloat,
             Symbol(map.getOrElse("species", "Unknown"))
         )
+    }
 
+    override def getMinMaxMap(data: Array[Iris] = dataSet): Map[Symbol, (Float, Float)] = {
+        val sepalLengthCmArr: Array[Float] = data.map(_.sepalLengthCm)
+        val sepalWidthCmArr: Array[Float] = data.map(_.sepalWidthCm)
+        val petalLengthCmArr: Array[Float] = data.map(_.petalLengthCm)
+        val petalWidthCmArr: Array[Float] = data.map(_.petalWidthCm)
+        Map(
+            'sepalLengthCm -> (sepalLengthCmArr.min, sepalLengthCmArr.max),
+            'sepalWidthCm -> (sepalWidthCmArr.min, sepalWidthCmArr.max),
+            'petalLengthCm -> (petalLengthCmArr.min, petalLengthCmArr.max),
+            'petalWidthCm -> (petalWidthCmArr.min, petalWidthCmArr.max)
+        )
     }
 }

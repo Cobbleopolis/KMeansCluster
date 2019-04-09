@@ -22,7 +22,9 @@ abstract class Dataset[T](source: Source, rngSeed: Long = System.currentTimeMill
       * @param map A map containing a single row from the csv, the key is the header of the column.
       * @return A class of type `T`
       */
-    def mapData(map: Map[String, String]): T
+    protected def mapData(map: Map[String, String]): T
+
+    def getMinMaxMap(data: Array[T] = dataSet): Map[Symbol, (Float, Float)]
 
     /**
       * Randomly samples the dataset. No entry will be repeated.
