@@ -2,6 +2,8 @@ package com.cobble.ai.clustering.iris
 
 case class Iris(id: Int, sepalLengthCm: Float, sepalWidthCm: Float, petalLengthCm: Float, petalWidthCm: Float, species: Symbol) {
 
+    val isCluster: Boolean = id == -1
+
     def getNormalizedValues(minMaxMap: Map[Symbol, (Float, Float)]): Iris = Iris(
         id,
         (sepalLengthCm - minMaxMap('sepalLengthCm)._1) / (minMaxMap('sepalLengthCm)._2 - minMaxMap('sepalLengthCm)._1),

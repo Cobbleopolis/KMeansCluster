@@ -4,7 +4,7 @@ import com.cobble.ai.clustering.core.Dataset
 
 import scala.io.Source
 
-class IrisDataset(resourceLocation: String = "iris.csv") extends Dataset[Iris](Source.fromResource(resourceLocation)) {
+class IrisDataset(resourceLocation: String = "iris.csv", rngSeed: Long = System.currentTimeMillis()) extends Dataset[Iris](Source.fromResource(resourceLocation), rngSeed) {
 
     override def mapData(map: Map[String, String]): Iris = {
         Iris(
