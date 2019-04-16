@@ -6,7 +6,7 @@ import scala.io.Source
 import scala.reflect.ClassTag
 import scala.util.Random
 
-abstract class Dataset[T](source: Source, rngSeed: Long = System.currentTimeMillis())(implicit classTag: ClassTag[T]) {
+abstract class Dataset[T](source: Source, val rngSeed: Long = System.currentTimeMillis())(implicit classTag: ClassTag[T]) {
 
     val random: Random = new Random(rngSeed)
 

@@ -6,17 +6,24 @@ import scala.util.Random
 
 object Main {
 
-    val TRAINING_SIZE: Float = 0.7f
+    val TRAINING_SIZE: Float = 0.8f
 
-    val CONVERGENCE_THRESHOLD: Float = 0.95f
-
+    val CONVERGENCE_THRESHOLD: Float = 1.0f
     val random: Random = new Random(System.currentTimeMillis())
 
     def main(args: Array[String]): Unit = {
-        val dataset: IrisDataset = new IrisDataset(rngSeed = 5)
+        val dataset: IrisDataset = new IrisDataset()
+        val minMaxMap: Map[Symbol, (Float, Float)] = dataset.getMinMaxMap()
         val centroids: Map[Symbol, Iris] = train(dataset)
-        println(centroids)
-
+        val predictedArr: Array[(Iris, Symbol)] = dataset.dataSet.map(i => (i, getClosestCentroid(i, centroids, minMaxMap)))
+        printf("%-5s %-16s %-16s %-10s %-16s %n", "Ids", "Expected", "Actual", "Is Correct", "Distances")
+        predictedArr.foreach(x => {
+            printf("%-5d %-16s %-16s %-10s ", x._1.id, x._2, x._1.species, isCorrect(x._1, x._2))
+            println(centroids.values.map(y => "%-9f".format(x._1.getNormalizedValues(minMaxMap).getDistance(y.getNormalizedValues(minMaxMap)))).mkString(" "))
+        })
+        val numCorrect: Int = predictedArr.count(x => isCorrect(x._1, x._2))
+        println(s"Correct: $numCorrect (${(numCorrect.toFloat / dataset.dataSize) * 100}%)")
+        println(s"Seed: ${dataset.rngSeed}")
     }
 
     def train(dataset: IrisDataset,
@@ -28,10 +35,10 @@ object Main {
         val normalData: Array[Iris] = set.map(_.getNormalizedValues(minMaxMap))
         var clusterMap: Map[Symbol, Iris] = (0 until numberOfCentroids).map(i => (Symbol(s"cluster$i"), Iris(
             -1,
-            Random.nextFloat(),
-            Random.nextFloat(),
-            Random.nextFloat(),
-            Random.nextFloat(),
+            dataset.random.nextFloat(),
+            dataset.random.nextFloat(),
+            dataset.random.nextFloat(),
+            dataset.random.nextFloat(),
             Symbol(s"cluster$i")
         ))).toMap
         val closestCentroidArr: Array[(Symbol, Iris)] = createClosestCentroidArray(normalData, clusterMap)
@@ -50,7 +57,7 @@ object Main {
         clusterMap.map { case (sym, centroid) =>
             val speciesList: Array[Symbol] = lastClosestCentroidMap(sym).map(_.species)
             val speciesSymbol: Symbol = speciesList.distinct.map(sym => (sym, speciesList.count(s => s == sym))).toMap.maxBy(_._2)._1
-            (speciesSymbol, centroid)
+            (speciesSymbol, centroid.getNonNormalizedValues(minMaxMap))
         }
     }
 
@@ -77,5 +84,12 @@ object Main {
                 centroidSymbol
             ))
         }
+    }
+
+    def isCorrect(iris: Iris, predictedSpecies: Symbol): Boolean = iris.species == predictedSpecies
+
+    def getClosestCentroid(iris: Iris, centroidMap: Map[Symbol, Iris], minMaxMap: Map[Symbol, (Float, Float)]): Symbol = {
+        centroidMap.mapValues(i => iris.getNormalizedValues(minMaxMap).getDistance(i.getNormalizedValues(minMaxMap)))
+            .minBy(_._2)._1
     }
 }
